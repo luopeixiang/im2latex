@@ -42,6 +42,6 @@ python3 train.py --data_path=FULL_DATASET_PATH
 
 [What You Get Is What You See:A Visual Markup Decompiler](https://arxiv.org/pdf/1609.04938v1.pdf)
 
-[The Oringal Torch implemention](https://github.com/harvardnlp/im2markup)
+[The Official Torch implemention](https://github.com/harvardnlp/im2markup)
 
 [A Tensorflow implemention](https://github.com/guillaumegenthial/im2latex/)

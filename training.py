@@ -23,7 +23,7 @@ class Trainer(object):
         self.best_val_loss = 1e18
 
     def train(self):
-        while self.epoch < self.args.epochs:
+        while self.epoch <= self.args.epochs:
             self.model.train()
             losses = 0.0
             for imgs, tgt4training, tgt4cal_loss in self.train_loader:
@@ -42,6 +42,9 @@ class Trainer(object):
             # one epoch Finished, calcute val loss
             val_loss = self.validate()
             self.lr_scheduler.step(val_loss)
+
+            self.epoch += 1
+            self.step = 0
 
     def train_step(self, imgs, tgt4training, tgt4cal_loss):
         self.optimizer.zero_grad()

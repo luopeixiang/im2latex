@@ -35,7 +35,7 @@ class LatexProducer(object):
 
     def _greedy_decoding(self, imgs):
         enc_outs, hiddens = self.encode(imgs)
-        dec_states, O_t = self.init_decoder(enc_outs, hiddens)
+        dec_states, O_t = self._model.init_decoder(enc_outs, hiddens)
 
         batch_size = imgs.size(0)
         # storing decoding results
@@ -43,11 +43,10 @@ class LatexProducer(object):
         # first decoding step's input
         tgt = torch.ones(batch_size, 1).long() * START_TOKEN
         for t in range(self.max_len):
-            dec_states, O_t, logit = self.step_decoding(
-                dec_states, O_t, enc_outs, tgt
-            )
+            dec_states, O_t, logit = self._model.step_decoding(
+                dec_states, O_t, enc_outs, tgt)
             tgt = torch.argmax(logit, dim=1, keepdim=1)
-            formulas_idx[:, t:t+1] = tgt
+            formulas_idx[:, t:t + 1] = tgt
         results = self._idx2formulas(formulas_idx)
         return results
 
@@ -65,8 +64,7 @@ class LatexProducer(object):
         for t in range(self.max_len):
             tgt = beam.current_predictions.unsqueeze(1)
             dec_states, O_t, probs = self.step_decoding(
-                dec_states, O_t, enc_outs, tgt
-            )
+                dec_states, O_t, enc_outs, tgt)
             log_probs = torch.log(probs)
 
             beam.advance(log_probs)
@@ -85,10 +83,8 @@ class LatexProducer(object):
                 dec_states = (h, c)
                 O_t = O_t.index_select(0, select_indices)
         # get results
-        formulas_idx = torch.stack(
-            [hyps[1] for hyps in beam.hypotheses],
-            dim=0
-        )
+        formulas_idx = torch.stack([hyps[1] for hyps in beam.hypotheses],
+                                   dim=0)
         results = self._idx2formulas(formulas_idx)
         return results
 
@@ -123,7 +119,7 @@ class LatexProducer(object):
 
         # store top k ids (k is less or equal to beam_size)
         topk_ids = torch.ones(beam_size).long() * START_TOKEN
-        topk_log_probs = torch.Tensor([0.0] + [-1e10] * (beam_size-1))
+        topk_log_probs = torch.Tensor([0.0] + [-1e10] * (beam_size - 1))
         seqs = torch.ones(beam_size, 1).long() * START_TOKEN
         # store complete sequences and corrosponing scores
         complete_seqs = []
@@ -131,28 +127,25 @@ class LatexProducer(object):
         k = beam_size
         for t in range(self.max_len):
             dec_states, O_t, logit = self.model.step_decoding(
-                dec_states, O_t, enc_outs, topk_ids.unsqueeze(1)
-            )
+                dec_states, O_t, enc_outs, topk_ids.unsqueeze(1))
             log_probs = torch.log(logit)
 
             log_probs += topk_log_probs.unsqueeze(1)
-            topk_log_probs, topk_ids = torch.topk(
-                log_probs.view(-1), k
-            )
+            topk_log_probs, topk_ids = torch.topk(log_probs.view(-1), k)
 
             vocab_size = len(self._sign2id)
             beam_index = topk_ids // vocab_size
             topk_ids = topk_ids % vocab_size
 
-            seqs = torch.cat(
-                [seqs.index_select(0, beam_index), topk_ids],
-                dim=1
-            )
+            seqs = torch.cat([seqs.index_select(0, beam_index), topk_ids],
+                             dim=1)
 
-            complete_inds = [ind for ind, next_word in enumerate(topk_ids)
-                             if next_word == END_TOKEN]
-            incomplete_inds = list(set(range(len(topk_ids))) -
-                                   set(complete_inds))
+            complete_inds = [
+                ind for ind, next_word in enumerate(topk_ids)
+                if next_word == END_TOKEN
+            ]
+            incomplete_inds = list(
+                set(range(len(topk_ids))) - set(complete_inds))
             if len(complete_inds) > 0:
                 complete_seqs.extend(seqs[complete_inds].tolist())
                 complete_seqs_scores.extend(topk_log_probs[complete_inds])

@@ -6,8 +6,7 @@ from torch.utils.data import Dataset
 
 
 class Im2LatexDataset(Dataset):
-    def __init__(self, data_dir, split,
-                 transform=transforms.ToTensor()):
+    def __init__(self, data_dir, split, transform=transforms.ToTensor()):
         """args:
         data_dir: root dir storing the prepoccessed data
         split: train, validate or test
@@ -33,7 +32,7 @@ class Im2LatexDataset(Dataset):
 
     def _get_pairs(self, split):
         # the line in this file map image to formulas
-        map_file = join(self.data_dir, split+"_filter.lst")
+        map_file = join(self.data_dir, split + "_filter.lst")
         # get image-formulas pairs
         pairs = []
         with open(map_file, 'r') as f:

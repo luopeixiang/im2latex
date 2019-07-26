@@ -1,5 +1,7 @@
 # Im2Latex
 
+![License](https://img.shields.io/apm/l/vim-mode.svg)
+
 Neural Model converting Image to Latex.
 
 ![Network structure of Im2latex Model](./imgs/model_structure.png)

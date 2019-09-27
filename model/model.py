@@ -3,9 +3,9 @@ import torch
 import torch.nn as nn
 import torch.nn.functional as F
 from torch.nn import init
+from torch.distributions.uniform import Uniform
 
-from position_embedding import add_positional_features
-from utils import schedule_sample
+from .position_embedding import add_positional_features
 
 INIT = 1e-2
 
@@ -53,6 +53,7 @@ class Im2LatexModel(nn.Module):
 
         self.add_pos_feat = add_pos_feat
         self.dropout = nn.Dropout(p=dropout)
+        self.uniform = Uniform(0, 1)
 
     def forward(self, imgs, formulas, epsilon=1.):
         """args:
@@ -72,8 +73,8 @@ class Im2LatexModel(nn.Module):
         for t in range(max_len):
             tgt = formulas[:, t:t+1]
             # schedule sampling
-            if logits:
-                tgt = schedule_sample(logits[-1], tgt, epsilon)
+            if logits and self.uniform.sample().item() > epsilon:
+                tgt = torch.argmax(torch.log(logits[-1]), dim=1, keepdim=True)
             # ont step decoding
             dec_states, O_t, logit = self.step_decoding(
                 dec_states, o_t, encoded_imgs, tgt)

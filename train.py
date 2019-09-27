@@ -6,10 +6,9 @@ import torch.optim as optim
 from torch.utils.data import DataLoader
 from torch.optim.lr_scheduler import ReduceLROnPlateau
 
+from model import Im2LatexModel, Trainer
 from utils import collate_fn, get_checkpoint
 from data import Im2LatexDataset
-from model import Im2LatexModel
-from training import Trainer
 from build_vocab import Vocab, load_vocab
 
 

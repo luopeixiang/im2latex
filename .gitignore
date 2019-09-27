@@ -2,5 +2,8 @@ __pycache__
 .vscode
 ckpt/best_ckpt
 test.py
+data/formula_images_processed
+data/*.lst
+data/*.pkl
 
 

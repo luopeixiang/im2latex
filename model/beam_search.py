@@ -110,7 +110,7 @@ class BeamSearch:
         start_top_log_probabilities, start_predicted_classes = \
             start_class_log_probabilities.topk(self.beam_size)
         if self.beam_size == 1 and (start_predicted_classes == self._end_index).all():
-            print("Empty sequences predicted. You may want to 
+            print("Empty sequences predicted. You may want to "
                   "increase the beam size or ensure "
                   "your step function is working properly.")
             return start_predicted_classes.unsqueeze(-1), start_top_log_probabilities
